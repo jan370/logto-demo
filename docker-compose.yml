@@ -1,0 +1,11 @@
+services:
+  logto-demo:
+    build: .
+    image: logto-oidc-demo:latest
+    restart: unless-stopped
+    environment:
+      LOGTO_ISSUER: ${LOGTO_ISSUER}
+      LOGTO_CLIENT_ID: ${LOGTO_CLIENT_ID}
+      LOGTO_CLIENT_SECRET: ${LOGTO_CLIENT_SECRET}
+    ports:
+      - "3001:8080"
