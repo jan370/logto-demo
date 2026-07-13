@@ -246,15 +246,27 @@ HTML = """<!doctype html>
     byId("logout").addEventListener("click", async () => {
       const params = new URLSearchParams({ post_logout_redirect_uri: window.location.origin });
       if (state.idToken) params.set("id_token_hint", state.idToken);
+      let logoutResult = "Kein Access Token vorhanden; nur Logto-Browsersitzung beendet.";
       if (state.accessToken) {
         try {
-          show("logout-result", await postJson("/api/logout", { token: state.accessToken }));
+          logoutResult = await postJson("/api/logout", { token: state.accessToken });
         } catch (error) {
-          show("logout-result", `Revocation fehlgeschlagen: ${error.message}`);
+          logoutResult = `Revocation fehlgeschlagen: ${error.message}`;
         }
       }
+      show("logout-result", logoutResult);
+      sessionStorage.setItem("logoutResult", JSON.stringify(logoutResult));
       window.location.href = `${ISSUER}/session/end?${params.toString()}`;
     });
+
+    const savedLogoutResult = sessionStorage.getItem("logoutResult");
+    if (savedLogoutResult) {
+      try {
+        show("logout-result", JSON.parse(savedLogoutResult));
+      } finally {
+        sessionStorage.removeItem("logoutResult");
+      }
+    }
 
     const query = new URLSearchParams(window.location.search);
     const code = query.get("code");
